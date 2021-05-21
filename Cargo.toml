@@ -1,0 +1,10 @@
+[package]
+name = "classic_crypto_cli"
+version = "0.1.0"
+authors = ["Tom Thorogood <tomthorogood@outlook.com>"]
+edition = "2018"
+
+[dependencies]
+classic_crypto = { path = "classic_crypto" }
+owo-colors = "2.0.0"
+structopt = "0.3.21"

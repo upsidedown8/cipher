@@ -1,0 +1,3 @@
+[submodule "classic_crypto"]
+	path = classic_crypto
+	url = https://github.com/upsidedown8/classic_crypto
