@@ -61,10 +61,8 @@ name = "classic_crypto"
 version = "0.1.0"
 dependencies = [
  "bincode",
- "owo-colors",
  "rand",
  "serde",
- "structopt",
 ]
 
 [[package]]
