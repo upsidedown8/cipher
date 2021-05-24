@@ -274,7 +274,7 @@ impl Cipher {
 
         for key in keys {
             for arg in args.iter() {
-                let short_name = key.key_info().short_name.clone();
+                let short_name = key.info().short_name.clone();
                 if arg[0] == short_name {
                     let remaining_args = arg[1..]
                         .iter()
@@ -316,11 +316,7 @@ impl Cipher {
         let mut result = String::new();
 
         for key in keys {
-            result.push_str(&format!(
-                "{} ({})\n",
-                key.key_info().short_name,
-                key.key_info().desc,
-            ));
+            result.push_str(&format!("{} ({})\n", key.info().short_name, key.desc(),));
         }
 
         result
