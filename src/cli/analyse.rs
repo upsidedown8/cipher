@@ -161,7 +161,7 @@ impl RunSubmodule for Analyse {
                 let percent = 100.0 * (item.1 as f64) / (self.text.len() as f64);
                 let width =
                     ((item.1 as f64) / (max_count as f64) * (TERM_WIDTH as f64 - 6.0)) as usize;
-                
+
                 let string = format!(
                     "{:>5.02}% | {:<5} | {} | [{}=>{}]",
                     percent,
