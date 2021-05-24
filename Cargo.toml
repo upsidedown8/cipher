@@ -8,3 +8,7 @@ edition = "2018"
 classic_crypto = { path = "classic_crypto" }
 owo-colors = "2.0.0"
 structopt = "0.3.21"
+
+[[bin]]
+name = "classic_crypto"
+path = "src/main.rs"
