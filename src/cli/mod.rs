@@ -19,7 +19,7 @@ mod cipher;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
-#[structopt(name = "classic_crypto")]
+#[structopt(name = "cipher")]
 #[structopt(rename_all = "snake")]
 /// Encrypt, decrypt, analyse and solve classical ciphers
 pub enum ClassicCrypto {

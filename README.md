@@ -2,19 +2,17 @@
 
 ### A command line tool for encrypting, decrypting, solving and analysing classical ciphers.
 
-## Install
-```
-cargo install classic_crypto_cli --git https://github.com/upsidedown8/classic_crypto_cli
-```
 ## Usage
 ```
-$ classic_crypto
+$ cargo install classic_crypto_cli --git https://github.com/upsidedown8/classic_crypto_cli
 
-classic_crypto 0.1.0
+$ cipher
+
+cipher 0.1.0
 Encrypt, decrypt, analyse and solve classical ciphers
 
 USAGE:
-    classic_crypto_cli <SUBCOMMAND>
+    cipher <SUBCOMMAND>
 
 FLAGS:
     -h, --help       Prints help information

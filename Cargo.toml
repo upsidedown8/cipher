@@ -10,5 +10,5 @@ owo-colors = "2.0.0"
 structopt = "0.3.21"
 
 [[bin]]
-name = "classic_crypto"
+name = "cipher"
 path = "src/main.rs"
