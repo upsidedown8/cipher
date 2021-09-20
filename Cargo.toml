@@ -1,5 +1,5 @@
 [package]
-name = "classic_crypto_cli"
+name = "cipher"
 version = "0.1.0"
 authors = ["Tom Thorogood <tomthorogood@outlook.com>"]
 edition = "2018"
