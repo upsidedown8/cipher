@@ -1,10 +1,10 @@
-# **classic_crypto_cli**
+# **cipher**
 
 ### A command line tool for encrypting, decrypting, solving and analysing classical ciphers.
 
 ## Usage
 ```
-$ cargo install classic_crypto_cli --git https://github.com/upsidedown8/classic_crypto_cli
+$ cargo install cipher --git https://github.com/upsidedown8/cipher
 
 $ cipher
 
