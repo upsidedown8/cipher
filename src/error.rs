@@ -1,11 +1,24 @@
-use thiserror::Error;
+use std::fmt;
 
-#[derive(Error, Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum CipherError {
-    #[error("Lang name already exists")]
     LangAlreadyExists,
-    #[error("Lang with specified name did not exist")]
     LangNotFound,
-    #[error("The selected lang was not set.\n\ttry `cipher lang set -n <name>`")]
-    SelectedLangNotSet,
+    NoLangSelected,
+}
+
+impl std::error::Error for CipherError {}
+impl fmt::Display for CipherError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                CipherError::LangAlreadyExists => "Lang name already exists",
+                CipherError::LangNotFound => "Lang with specified name did not exist",
+                CipherError::NoLangSelected =>
+                    "No language was selected.\n\ttry `cipher lang set -n <name>`",
+            }
+        )
+    }
 }
