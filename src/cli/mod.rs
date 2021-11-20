@@ -1,3 +1,4 @@
+pub mod completions;
 pub mod encrypt_and_decrypt;
 pub mod lang;
 pub mod opt;
