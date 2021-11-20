@@ -2,13 +2,23 @@
 name = "cipher"
 version = "0.1.0"
 authors = ["Tom Thorogood <tomthorogood@outlook.com>"]
-edition = "2018"
+edition = "2021"
+build = "src/build.rs"
 
 [dependencies]
 classic_crypto = { path = "classic_crypto" }
-owo-colors = "2.0.0"
 structopt = "0.3.21"
+anyhow = "1.0.45"
+log = "0.4.0"
+env_logger = "0.8.4"
+serde = "1.0.130"
+thiserror = "1.0.30"
+directories = "4.0.1"
+toml = "0.5"
+bincode = "1.3.3"
+clap = "2.33"
 
-[[bin]]
-name = "cipher"
-path = "src/main.rs"
+[build-dependencies]
+structopt = "0.3.21"
+clap = "2.33"
+clap_generate = "3.0.0-beta.5"
