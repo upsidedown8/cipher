@@ -1,171 +1,229 @@
-use structopt::StructOpt;
+use std::path::PathBuf;
+
+use clap::{ArgEnum, Args, Parser, Subcommand};
 
 /// Encrypt, decrypt and solve classical ciphers.
-#[derive(StructOpt)]
-#[structopt(name = "cipher")]
-#[structopt(rename_all = "snake")]
+#[derive(Parser, Debug)]
+#[clap(name = "cipher", author = "Tom Thorogood <tomthorogood@outlook.com>")]
 pub enum Opt {
+    /// Generate completion scripts
+    Completions {
+        /// Output file to write completion to, if unspecified then writes to
+        /// stdout
+        #[clap(short, long, parse(from_os_str))]
+        output: Option<PathBuf>,
+        /// Shell to generate completions for
+        #[clap(arg_enum)]
+        shell: Shell,
+    },
     /// Manage language configuration
-    Lang(LangOpt),
+    Lang {
+        #[clap(subcommand)]
+        sub: LangOpt,
+    },
     /// Perform statistical analysis on a ciphertext
     Stats {
+        /// If present, overrides the selected lang and uses the value given
+        #[clap(global = true, short, long)]
+        lang: Option<String>,
         /// Text to analyse. If not present then read from stdin
+        #[clap(global = true)]
         text: Option<String>,
-        #[structopt(flatten)]
+        #[clap(subcommand)]
         cmd: StatsOpt,
     },
     /// Encrypt a plaintext with a cipher. Ciphers are specified with
     /// the submodules
-    Encrypt(EncryptOpt),
+    Encrypt(EncryptDecryptOpt),
     /// Decrypt a ciphertext with a cipher. Ciphers are specified with
     /// the submodules
-    Decrypt(DecryptOpt),
+    Decrypt(EncryptDecryptOpt),
     /// Solve a ciphertext. Use submodules to solve a specific cipher.
     /// If no cipher is specified, the input will be solved analysing the
     /// text and trying likely ciphers
-    Solve(SolveOpt),
+    Solve {
+        /// The cipher to solve as. If not specified, the message will be
+        /// automatically solved
+        #[clap(subcommand)]
+        cipher: Option<CipherSolveOpt>,
+        /// A crib to aid in solving. This may not always be used
+        #[clap(global = true, short, long)]
+        crib: Option<String>,
+        /// The position of the crib within the ciphertext
+        #[clap(global = true, long, short = 'p', requires("crib"))]
+        crib_pos: Option<usize>,
+        /// Display the key once solved
+        #[clap(global = true, short = 'k', long)]
+        show_key: bool,
+        /// Hide the plaintext once solved
+        #[clap(global = true, short = 'T', long)]
+        no_plain: bool,
+        /// If present, overrides the selected lang and uses the value given
+        #[clap(global = true, short, long)]
+        lang: Option<String>,
+        /// The text to solve, if not specified then read from stdin
+        #[clap(global = true)]
+        text: Option<String>,
+    },
 }
 
-#[derive(StructOpt)]
-#[structopt(rename_all = "kebab")]
+#[derive(ArgEnum, Clone, Copy, Debug)]
+pub enum Shell {
+    Bash,
+    PowerShell,
+}
+
+#[derive(Subcommand, Debug)]
 pub enum LangOpt {
     /// List all languages
     List,
+    /// Select a language
+    Set {
+        /// Name of the language
+        #[clap(short, long)]
+        lang: String,
+    },
+    /// Select an alphabet. You can view the current selection with `lang list`
+    SetAlph {
+        /// Language to select alphabet for
+        #[clap(short, long)]
+        lang: Option<String>,
+        /// Length of alphabet to select
+        #[clap(short, long)]
+        length: usize,
+    },
     /// Remove a language
-    #[structopt(name = "rm")]
+    #[clap(name = "rm")]
     Remove {
         /// Name of the language to remove
-        #[structopt(short, long)]
+        #[clap(short, long)]
         name: String,
         /// Remove without asking for confirmation
-        #[structopt(short, long)]
+        #[clap(short, long)]
         force: bool,
     },
     /// Add a new language
-    Add {
+    New {
         /// Name of the language to add
-        #[structopt(short, long)]
+        #[clap(short, long)]
         name: String,
         /// Uppercase alphabet
-        #[structopt(short, long)]
+        #[clap(short, long)]
         upper: String,
         /// Lowercase alphabet
-        #[structopt(short, long)]
+        #[clap(short, long)]
         lower: String,
         /// Text corpus, if not present then read from stdin
-        #[structopt(short, long)]
+        #[clap(short, long)]
         corpus: Option<String>,
     },
     /// Change an existing language, adding or overwriting a cipher
     /// alphabet
     Alphabet {
         /// Name of the language to add the alphabet to
-        #[structopt(short, long)]
+        #[clap(short, long)]
         name: String,
         /// Uppercase alphabet
-        #[structopt(short, long)]
+        #[clap(short, long)]
         upper: String,
         /// Lowercase alphabet
-        #[structopt(short, long)]
+        #[clap(short, long)]
         lower: String,
         /// Uppercase letters which should be removed from the alphabet
         /// when scoring
-        #[structopt(long)]
+        #[clap(long)]
         discard_upper: String,
         /// Lowercase letters which should be removed from the alphabet
         /// when scoring
-        #[structopt(long)]
+        #[clap(long)]
         discard_lower: String,
         /// Text corpus, if not present then read from stdin
-        #[structopt(short, long)]
+        #[clap(short, long)]
         corpus: Option<String>,
     },
 }
 
-#[derive(StructOpt)]
-#[structopt(rename_all = "kebab")]
+#[derive(Subcommand, Debug)]
 pub enum StatsOpt {
     /// Display a graph showing periodic index of coincedence
-    Periodic,
+    Periodic {
+        /// If present, sets the width of the graph
+        #[clap(short, long, default_value = "60")]
+        width: usize,
+    },
     /// Display a chart showing letter frequency
     Freq,
+    /// Display the index of coincedence of the text
+    Ioc,
+    /// Display the chi squared value for the text
+    ChiSquared,
+    /// Display the Unigram score for the text
+    Unigram,
+    /// Display the Bigram score for the text
+    Bigram,
+    /// Display the Trigram score for the text
+    Trigram,
+    /// Display the Quadgram score for the text
+    Quadgram,
+    /// Display the text length and its factors
+    Length,
 }
 
-#[derive(StructOpt)]
-pub struct EncryptOpt {
-    /// The cipher to encrypt with
-    #[structopt(subcommand)]
-    cipher: CipherOpt,
-    /// If present, encrypts with a random cipher state (overrides all key fields
-    /// and the identity option)
-    #[structopt(global = true, short, long)]
-    random: bool,
-    /// If present, decrypts with an identity version of the cipher (overrides key
-    /// fields)
-    #[structopt(global = true, short, long)]
-    identity: bool,
-    /// The text to solve, if not specified then read from stdin
-    #[structopt(global = true)]
-    text: Option<String>,
+#[derive(Args, Debug)]
+pub struct EncryptDecryptOpt {
+    /// The algorithm to use
+    #[clap(subcommand)]
+    pub cipher: CipherOpt,
+    /// If present, overrides the selected lang and uses the value given
+    #[clap(global = true, short, long)]
+    pub lang: Option<String>,
+    /// The text to encrypt/decrypt, if not specified then read from stdin
+    #[clap(global = true)]
+    pub text: Option<String>,
 }
 
-#[derive(StructOpt)]
-pub struct DecryptOpt {
-    /// The cipher to decrypt with
-    #[structopt(flatten)]
-    cipher: CipherOpt,
-    /// If present, encrypts with a random cipher state (overrides all key fields
-    /// and the identity option)
-    #[structopt(global = true, short, long)]
-    random: bool,
-    /// If present, decrypts with an identity version of the cipher (overrides key
-    /// fields)
-    #[structopt(global = true, short, long)]
-    identity: bool,
-    /// The text to solve, if not specified then read from stdin
-    #[structopt(global = true)]
-    text: Option<String>,
-}
-
-#[derive(StructOpt)]
-pub struct SolveOpt {
-    /// The cipher to solve as. If not specified, the message will be
-    /// automatically solved
-    #[structopt(subcommand)]
-    cipher: Option<CipherSolveOpt>,
-    /// A crib to aid in solving. This may not always be used
-    #[structopt(global = true, short, long)]
-    crib: Option<String>,
-    /// The position of the crib within the ciphertext
-    #[structopt(global = true, long, requires("crib"))]
-    crib_pos: Option<usize>,
-    /// Display the key once solved
-    #[structopt(global = true, short = "k", long)]
-    show_key: bool,
-    /// Hide the plaintext once solved
-    #[structopt(global = true, short = "T", long)]
-    no_plain: bool,
-    /// The text to solve, if not specified then read from stdin
-    #[structopt(global = true)]
-    text: Option<String>,
-}
-
-#[derive(StructOpt)]
+#[derive(Subcommand, Debug)]
 pub enum CipherOpt {
-    /// Encrypts each letter with ax+b
-    #[structopt(name = "affine")]
+    /// The Affine cipher
     Affine {
         /// Affine coefficient, a
-        #[structopt(short, long)]
-        a: usize,
+        #[clap(short, long)]
+        a: i32,
         /// Affine constant, b
-        #[structopt(short, long)]
-        b: usize,
+        #[clap(short, long)]
+        b: i32,
+    },
+    /// The Atbash cipher
+    Atbash,
+    /// The Caesar cipher
+    Caesar {
+        /// Caesar shift
+        #[clap(short, long)]
+        shift: i32,
+    },
+    /// The Railfence cipher
+    Railfence {
+        /// Number of rails
+        #[clap(short, long)]
+        rails: i32,
+    },
+    /// The Rot13 cipher
+    Rot13,
+    /// The Scytale cipher
+    Scytale {
+        /// Number of faces
+        #[clap(short, long)]
+        faces: i32,
+    },
+    /// The Substitution cipher
+    Substitution {
+        /// Keyword or alphabet
+        #[clap(short, long)]
+        keyword: String,
     },
 }
 
-#[derive(StructOpt)]
-#[structopt(rename_all = "snake")]
+#[derive(Subcommand, Debug)]
 pub enum CipherSolveOpt {
     Affine,
 }
