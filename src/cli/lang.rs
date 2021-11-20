@@ -4,7 +4,13 @@ use std::io::{stdin, stdout, Read, Write};
 /// Handles the lang submodule
 pub fn lang(cfg: &mut CipherConfig, lang_opt: LangOpt) -> anyhow::Result<()> {
     match lang_opt {
-        LangOpt::Add {
+        LangOpt::Set { lang } => {
+            cfg.set_selected(&lang)?;
+        }
+        LangOpt::SetAlph { lang, length } => {
+            cfg.set_primary_alph(lang, length)?;
+        }
+        LangOpt::New {
             name,
             upper,
             lower,
@@ -20,8 +26,32 @@ pub fn lang(cfg: &mut CipherConfig, lang_opt: LangOpt) -> anyhow::Result<()> {
             cfg.add_lang(name, &lang)?;
         }
         LangOpt::List => {
+            let selected = cfg.selected_lang();
+
             for name in cfg.lang_names() {
-                println!("{}", name);
+                if selected == Some(name) {
+                    print!("* ");
+                } else {
+                    print!("  ");
+                }
+
+                print!("{}", name);
+                if let Some(meta) = cfg.lang_meta(name) {
+                    print!(
+                        " primary:{}, alphabets:[{}]",
+                        meta.primary,
+                        meta.alphabets.iter().map(|a| a.to_string()).fold(
+                            String::new(),
+                            |mut acc, x| {
+                                acc.push_str(&x);
+                                acc.push(',');
+                                acc
+                            }
+                        )
+                    );
+                }
+
+                println!();
             }
         }
         LangOpt::Remove { name, force } => {
@@ -42,6 +72,7 @@ pub fn lang(cfg: &mut CipherConfig, lang_opt: LangOpt) -> anyhow::Result<()> {
                 cfg.rm_lang(name)?;
             }
         }
+        #[allow(unused)]
         LangOpt::Alphabet {
             upper,
             lower,
@@ -50,6 +81,12 @@ pub fn lang(cfg: &mut CipherConfig, lang_opt: LangOpt) -> anyhow::Result<()> {
             corpus,
             name,
         } => {
+            // let corpus = util::unwrap_or_stdin(corpus)?;
+            // let mut lang = cfg.load_lang(&name)?;
+
+            // let alphabet = AlphabetBuilder::new(upper, lower, &corpus, &lang)?
+            //     .add_sub(cp, primary_cp);
+
             todo!()
         }
     }

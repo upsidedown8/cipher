@@ -21,7 +21,7 @@ pub struct CipherConfig {
 }
 
 #[derive(Serialize, Deserialize, Debug, Default)]
-struct LangMeta {
+pub struct LangMeta {
     // used as the filename
     pub id: usize,
     // primary alphabet length
@@ -31,12 +31,50 @@ struct LangMeta {
 }
 
 impl CipherConfig {
+    /// Sets the primary alphabet for the provided lang,
+    /// or if `name` is `None` then sets for the selected lang.
+    pub fn set_primary_alph(&mut self, name: Option<String>, length: usize) -> Result<()> {
+        let name = match name.or_else(|| self.selected_lang().map(|s| s.to_owned())) {
+            Some(name) => name,
+            None => return Err(CipherError::NoLangSelected.into()),
+        };
+
+        let mut lang = self.load_lang(&name)?;
+        lang.set_primary(length)?;
+
+        let mut meta = self.lang_map.get_mut(&name).unwrap();
+        meta.primary = length;
+
+        let path = Self::lang_file_path(self.lang_map[&*name].id)?;
+        let bytes = bincode::serialize(&lang)?;
+        std::fs::write(path, &bytes)?;
+
+        Ok(())
+    }
+    /// Gets the currently selected lang
+    pub fn selected_lang(&self) -> Option<&str> {
+        self.selected_lang.as_deref()
+    }
+    /// Loads the lang given by `name`, or if that fails, the selected lang
+    pub fn load_lang_or_selected(&self, name: Option<String>) -> Result<Lang> {
+        match name {
+            Some(name) => match self.load_lang(&name) {
+                Ok(lang) => Ok(lang),
+                Err(_) => self.load_selected(),
+            },
+            None => self.load_selected(),
+        }
+    }
+    /// Metadata for the language
+    pub fn lang_meta(&self, name: &str) -> Option<&LangMeta> {
+        self.lang_map.get(name.trim())
+    }
     /// Loads the preferred lang if it is set
     pub fn load_selected(&self) -> Result<Lang> {
         self.load_lang(
             self.selected_lang
                 .as_ref()
-                .ok_or(CipherError::SelectedLangNotSet)?,
+                .ok_or(CipherError::NoLangSelected)?,
         )
     }
     /// Adds a language file by name
@@ -97,11 +135,8 @@ impl CipherConfig {
             .map(|m| m.id)
             .ok_or(CipherError::LangNotFound)?;
 
-        let file = fs::OpenOptions::new()
-            .read(true)
-            .open(Self::lang_file_path(id)?)?;
-
-        let lang = bincode::deserialize_from(&file)?;
+        let bytes = fs::read(Self::lang_file_path(id)?)?;
+        let lang = bincode::deserialize(&bytes)?;
 
         Ok(lang)
     }
