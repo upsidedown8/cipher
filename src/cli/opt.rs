@@ -19,7 +19,7 @@ pub enum Opt {
     /// Manage language configuration
     Lang {
         #[clap(subcommand)]
-        sub: LangOpt,
+        sub: LangCmd,
     },
     /// Perform statistical analysis on a ciphertext
     Stats {
@@ -27,17 +27,17 @@ pub enum Opt {
         #[clap(global = true, short, long)]
         lang: Option<String>,
         /// Text to analyse. If not present then read from stdin
-        #[clap(global = true)]
+        #[clap(global = true, short, long)]
         text: Option<String>,
         #[clap(subcommand)]
-        cmd: StatsOpt,
+        cmd: StatsCmd,
     },
     /// Encrypt a plaintext with a cipher. Ciphers are specified with
     /// the submodules
-    Encrypt(EncryptDecryptOpt),
+    Encrypt(CryptCmd),
     /// Decrypt a ciphertext with a cipher. Ciphers are specified with
     /// the submodules
-    Decrypt(EncryptDecryptOpt),
+    Decrypt(CryptCmd),
     /// Solve a ciphertext. Use submodules to solve a specific cipher.
     /// If no cipher is specified, the input will be solved analysing the
     /// text and trying likely ciphers
@@ -45,7 +45,7 @@ pub enum Opt {
         /// The cipher to solve as. If not specified, the message will be
         /// automatically solved
         #[clap(subcommand)]
-        cipher: Option<CipherSolveOpt>,
+        cipher: Option<CipherSolveCmd>,
         /// A crib to aid in solving. This may not always be used
         #[clap(global = true, short, long)]
         crib: Option<String>,
@@ -62,7 +62,7 @@ pub enum Opt {
         #[clap(global = true, short, long)]
         lang: Option<String>,
         /// The text to solve, if not specified then read from stdin
-        #[clap(global = true)]
+        #[clap(global = true, short, long)]
         text: Option<String>,
     },
 }
@@ -74,7 +74,7 @@ pub enum Shell {
 }
 
 #[derive(Subcommand, Debug)]
-pub enum LangOpt {
+pub enum LangCmd {
     /// List all languages
     List,
     /// Select a language
@@ -144,17 +144,45 @@ pub enum LangOpt {
 }
 
 #[derive(Subcommand, Debug)]
-pub enum StatsOpt {
+pub enum StatsCmd {
     /// Display a graph showing periodic index of coincedence
     Periodic {
         /// If present, sets the width of the graph
         #[clap(short, long, default_value = "60")]
         width: usize,
+        /// If present, consider the the characters given rather than the
+        /// language's alphabet
+        #[clap(short, long)]
+        alphabet: Option<String>,
     },
     /// Display a chart showing letter frequency
-    Freq,
+    Freq {
+        /// If present, also show frequencies for whitespace characters
+        #[clap(short, long)]
+        whitespace: bool,
+        /// If present, also show frequencies for all other (non-whitespace)
+        /// characters
+        #[clap(short, long)]
+        punct: bool,
+        /// If present, consider the the characters given rather than the
+        /// language's alphabet
+        #[clap(short, long)]
+        alphabet: Option<String>,
+    },
     /// Display the index of coincedence of the text
-    Ioc,
+    Ioc {
+        /// If present, consider the the characters given rather than the
+        /// language's alphabet
+        #[clap(short, long)]
+        alphabet: Option<String>,
+    },
+    /// Display the text length and its factors
+    Length {
+        /// If present, consider the the characters given rather than the
+        /// language's alphabet
+        #[clap(short, long)]
+        alphabet: Option<String>,
+    },
     /// Display the chi squared value for the text
     ChiSquared,
     /// Display the Unigram score for the text
@@ -165,25 +193,23 @@ pub enum StatsOpt {
     Trigram,
     /// Display the Quadgram score for the text
     Quadgram,
-    /// Display the text length and its factors
-    Length,
 }
 
 #[derive(Args, Debug)]
-pub struct EncryptDecryptOpt {
+pub struct CryptCmd {
     /// The algorithm to use
     #[clap(subcommand)]
-    pub cipher: CipherOpt,
+    pub cipher: CipherCmd,
     /// If present, overrides the selected lang and uses the value given
     #[clap(global = true, short, long)]
     pub lang: Option<String>,
     /// The text to encrypt/decrypt, if not specified then read from stdin
-    #[clap(global = true)]
+    #[clap(global = true, short, long)]
     pub text: Option<String>,
 }
 
 #[derive(Subcommand, Debug)]
-pub enum CipherOpt {
+pub enum CipherCmd {
     /// The Affine cipher
     Affine {
         /// Affine coefficient, a
@@ -224,6 +250,6 @@ pub enum CipherOpt {
 }
 
 #[derive(Subcommand, Debug)]
-pub enum CipherSolveOpt {
+pub enum CipherSolveCmd {
     Affine,
 }
