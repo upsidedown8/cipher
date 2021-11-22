@@ -1,16 +1,16 @@
-use crate::{util, CipherConfig, Lang, LangOpt};
+use crate::{util, CipherConfig, Lang, LangCmd};
 use std::io::{stdin, stdout, Read, Write};
 
 /// Handles the lang submodule
-pub fn lang(cfg: &mut CipherConfig, lang_opt: LangOpt) -> anyhow::Result<()> {
+pub fn lang(cfg: &mut CipherConfig, lang_opt: LangCmd) -> anyhow::Result<()> {
     match lang_opt {
-        LangOpt::Set { lang } => {
+        LangCmd::Set { lang } => {
             cfg.set_selected(&lang)?;
         }
-        LangOpt::SetAlph { lang, length } => {
+        LangCmd::SetAlph { lang, length } => {
             cfg.set_primary_alph(lang, length)?;
         }
-        LangOpt::New {
+        LangCmd::New {
             name,
             upper,
             lower,
@@ -25,7 +25,7 @@ pub fn lang(cfg: &mut CipherConfig, lang_opt: LangOpt) -> anyhow::Result<()> {
 
             cfg.add_lang(name, &lang)?;
         }
-        LangOpt::List => {
+        LangCmd::List => {
             let selected = cfg.selected_lang();
 
             for name in cfg.lang_names() {
@@ -54,7 +54,7 @@ pub fn lang(cfg: &mut CipherConfig, lang_opt: LangOpt) -> anyhow::Result<()> {
                 println!();
             }
         }
-        LangOpt::Remove { name, force } => {
+        LangCmd::Remove { name, force } => {
             let name = name.trim();
 
             let exists = cfg.lang_names().any(|n| n == name);
@@ -73,7 +73,7 @@ pub fn lang(cfg: &mut CipherConfig, lang_opt: LangOpt) -> anyhow::Result<()> {
             }
         }
         #[allow(unused)]
-        LangOpt::Alphabet {
+        LangCmd::Alphabet {
             upper,
             lower,
             discard_lower,

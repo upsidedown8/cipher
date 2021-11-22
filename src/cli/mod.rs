@@ -1,5 +1,5 @@
 pub mod completions;
-pub mod encrypt_and_decrypt;
+pub mod crypt;
 pub mod lang;
 pub mod opt;
 pub mod solve;

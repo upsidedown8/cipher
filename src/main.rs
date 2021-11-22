@@ -24,8 +24,8 @@ fn main() -> anyhow::Result<()> {
             completions::completions(output, shell);
             Ok(())
         }
-        Opt::Encrypt(encrypt_opt) => encrypt_and_decrypt::encrypt(&cfg, encrypt_opt),
-        Opt::Decrypt(decrypt_opt) => encrypt_and_decrypt::decrypt(&cfg, decrypt_opt),
+        Opt::Encrypt(encrypt_opt) => crypt::encrypt(&cfg, encrypt_opt),
+        Opt::Decrypt(decrypt_opt) => crypt::decrypt(&cfg, decrypt_opt),
         Opt::Lang { sub } => lang::lang(&mut cfg, sub),
         solve @ Opt::Solve { .. } => solve::solve(&cfg, solve),
         Opt::Stats { lang, text, cmd } => stats::stats(&cfg, lang, text, cmd),
