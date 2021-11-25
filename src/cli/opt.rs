@@ -39,8 +39,8 @@ pub enum Opt {
     /// the submodules
     Decrypt(CryptCmd),
     /// Solve a ciphertext. Use submodules to solve a specific cipher.
-    /// If no cipher is specified, the input will be solved analysing the
-    /// text and trying likely ciphers
+    /// If no cipher is specified, the input will be solved by analysing
+    /// the text and trying likely ciphers
     Solve {
         /// The cipher to solve as. If not specified, the message will be
         /// automatically solved
@@ -58,6 +58,9 @@ pub enum Opt {
         /// Hide the plaintext once solved
         #[clap(global = true, short = 'T', long)]
         no_plain: bool,
+        /// Control the scoring statistics used to break the cipher
+        #[clap(global = true, arg_enum, short = 's', long = "size")]
+        stats_size: Option<StatsSizeOpt>,
         /// If present, overrides the selected lang and uses the value given
         #[clap(global = true, short, long)]
         lang: Option<String>,
@@ -65,6 +68,14 @@ pub enum Opt {
         #[clap(global = true, short, long)]
         text: Option<String>,
     },
+}
+
+#[derive(ArgEnum, Clone, Copy, Debug)]
+pub enum StatsSizeOpt {
+    Unigrams,
+    Bigrams,
+    Trigrams,
+    Quadgrams,
 }
 
 #[derive(ArgEnum, Clone, Copy, Debug)]
@@ -251,5 +262,24 @@ pub enum CipherCmd {
 
 #[derive(Subcommand, Debug)]
 pub enum CipherSolveCmd {
+    /// The Affine cipher
     Affine,
+    /// The Atbash cipher
+    Atbash,
+    /// The Caesar cipher
+    Caesar,
+    /// The Railfence cipher
+    Railfence,
+    /// The Rot13 cipher
+    Rot13,
+    /// The Scytale cipher
+    Scytale,
+    /// The Substitution cipher
+    Substitution {
+        /// Limit to the number of iterations that the algorithm should run for
+        max_iterations: Option<usize>,
+        /// Number of times that a solution must be reached to determine that it
+        /// is the optimal solution
+        min_repetitions: Option<usize>,
+    },
 }

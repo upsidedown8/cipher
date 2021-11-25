@@ -6,7 +6,10 @@ use classic_crypto::cipher::{
 
 use crate::{cli::opt::CipherCmd, util, CipherConfig, CryptCmd};
 
-trait CliCipher {
+pub trait CliCipher
+where
+    Self: std::fmt::Display,
+{
     fn encrypt(&self, msg: &str) -> String;
     fn decrypt(&self, msg: &str) -> String;
 }
@@ -29,7 +32,7 @@ enum CipherMode {
     Decrypt,
 }
 
-fn encrypt_or_decrypt(cfg: &CipherConfig, opt: CryptCmd, mode: CipherMode) -> anyhow::Result<()> {
+fn crypt(cfg: &CipherConfig, opt: CryptCmd, mode: CipherMode) -> anyhow::Result<()> {
     let CryptCmd { cipher, lang, text } = opt;
 
     let lang = &match lang {
@@ -61,10 +64,10 @@ fn encrypt_or_decrypt(cfg: &CipherConfig, opt: CryptCmd, mode: CipherMode) -> an
 
 /// Handles the encrypt submodule
 pub fn encrypt(cfg: &CipherConfig, encrypt_opt: CryptCmd) -> anyhow::Result<()> {
-    encrypt_or_decrypt(cfg, encrypt_opt, CipherMode::Encrypt)
+    crypt(cfg, encrypt_opt, CipherMode::Encrypt)
 }
 
 /// Handles the decrypt submodule
 pub fn decrypt(cfg: &CipherConfig, decrypt_opt: CryptCmd) -> anyhow::Result<()> {
-    encrypt_or_decrypt(cfg, decrypt_opt, CipherMode::Decrypt)
+    crypt(cfg, decrypt_opt, CipherMode::Decrypt)
 }
