@@ -1,7 +1,7 @@
 //! Handles both encrypt and decrypt submodules
 
 use classic_crypto::cipher::{
-    Affine, Atbash, Caesar, Cipher, Railfence, Rot13, Scytale, Substitution,
+    Affine, Atbash, Caesar, Cipher, ClassicVigenere, Railfence, Rot13, Scytale, Substitution,
 };
 
 use crate::{cli::opt::CipherCmd, util, CipherConfig, CryptCmd};
@@ -47,6 +47,9 @@ fn crypt(cfg: &CipherConfig, opt: CryptCmd, mode: CipherMode) -> anyhow::Result<
         CipherCmd::Affine { a, b } => Box::new(Affine::new(lang, a, b)?),
         CipherCmd::Atbash => Box::new(Atbash::identity(lang)),
         CipherCmd::Caesar { shift } => Box::new(Caesar::new(lang, shift)?),
+        CipherCmd::ClassicVigenere { keyword } => {
+            Box::new(ClassicVigenere::new(lang, keyword.as_str())?)
+        }
         CipherCmd::Railfence { rails } => Box::new(Railfence::new(lang, rails)?),
         CipherCmd::Rot13 => Box::new(Rot13::identity(lang)),
         CipherCmd::Scytale { faces } => Box::new(Scytale::new(lang, faces)?),

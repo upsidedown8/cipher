@@ -34,6 +34,16 @@ pub fn solve(cfg: &CipherConfig, solve_opt: Opt) -> anyhow::Result<()> {
                 CipherSolveCmd::Affine => Box::new(Affine::solve(lang, text, stats_size)),
                 CipherSolveCmd::Atbash => Box::new(Atbash::solve(lang, text, ())),
                 CipherSolveCmd::Caesar => Box::new(Caesar::solve(lang, text, stats_size)),
+                CipherSolveCmd::ClassicVigenere { max_key_length } => {
+                    Box::new(ClassicVigenere::solve(
+                        lang,
+                        text,
+                        ClassicVigenereSolve {
+                            stats_size,
+                            max_key_length,
+                        },
+                    ))
+                }
                 CipherSolveCmd::Railfence => Box::new(Railfence::solve(lang, text, stats_size)),
                 CipherSolveCmd::Rot13 => Box::new(Rot13::solve(lang, text, ())),
                 CipherSolveCmd::Scytale => Box::new(Scytale::solve(lang, text, stats_size)),
@@ -45,8 +55,8 @@ pub fn solve(cfg: &CipherConfig, solve_opt: Opt) -> anyhow::Result<()> {
                     text,
                     SubstitutionSolve {
                         stats_size,
-                        max_iterations: max_iterations.unwrap_or(2000),
-                        min_repetitions: min_repetitions.unwrap_or(5),
+                        max_iterations,
+                        min_repetitions,
                     },
                 )),
             },
@@ -57,7 +67,7 @@ pub fn solve(cfg: &CipherConfig, solve_opt: Opt) -> anyhow::Result<()> {
         }
 
         if !no_plain {
-            println!("{}", solution.decrypt(text));
+            println!("{}", solution.decrypt(text).trim_end());
         }
     }
 

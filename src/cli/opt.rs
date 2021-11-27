@@ -238,6 +238,11 @@ pub enum CipherCmd {
         #[clap(short, long)]
         shift: i32,
     },
+    ClassicVigenere {
+        /// Keyword
+        #[clap(short, long)]
+        keyword: String,
+    },
     /// The Railfence cipher
     Railfence {
         /// Number of rails
@@ -268,6 +273,11 @@ pub enum CipherSolveCmd {
     Atbash,
     /// The Caesar cipher
     Caesar,
+    ClassicVigenere {
+        /// Maximum key length to try
+        #[clap(long, default_value = "30")]
+        max_key_length: usize,
+    },
     /// The Railfence cipher
     Railfence,
     /// The Rot13 cipher
@@ -277,9 +287,11 @@ pub enum CipherSolveCmd {
     /// The Substitution cipher
     Substitution {
         /// Limit to the number of iterations that the algorithm should run for
-        max_iterations: Option<usize>,
+        #[clap(long, default_value = "2000")]
+        max_iterations: usize,
         /// Number of times that a solution must be reached to determine that it
         /// is the optimal solution
-        min_repetitions: Option<usize>,
+        #[clap(long, default_value = "5")]
+        min_repetitions: usize,
     },
 }
