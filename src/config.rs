@@ -199,7 +199,7 @@ impl CipherConfig {
         Self::config_path().map(|p| p.join(LANG_DIR))
     }
     fn lang_file_path(id: usize) -> Result<PathBuf> {
-        Self::lang_dir().map(|cfg| cfg.join(format!("{}.bin", id.to_string())))
+        Self::lang_dir().map(|cfg| cfg.join(format!("{}.bin", id)))
     }
     fn config_path() -> Result<PathBuf> {
         ProjectDirs::from(QUALIFIER, ORGANISATION, APPLICATION)

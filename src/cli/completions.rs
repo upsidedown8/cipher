@@ -1,6 +1,6 @@
 use super::opt;
 use clap::IntoApp;
-use clap_generate::Shell;
+use clap_complete::Shell;
 use std::path::PathBuf;
 
 pub fn completions(output: Option<PathBuf>, shell: opt::Shell) {
@@ -21,7 +21,7 @@ pub fn completions(output: Option<PathBuf>, shell: opt::Shell) {
         })
         .flatten()
     {
-        Some(mut file) => clap_generate::generate(shell, &mut app, "cipher", &mut file),
-        None => clap_generate::generate(shell, &mut app, "cipher", &mut std::io::stdout()),
+        Some(mut file) => clap_complete::generate(shell, &mut app, "cipher", &mut file),
+        None => clap_complete::generate(shell, &mut app, "cipher", &mut std::io::stdout()),
     };
 }
