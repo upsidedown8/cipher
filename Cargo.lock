@@ -99,7 +99,6 @@ dependencies = [
 name = "classic_crypto"
 version = "0.2.0"
 dependencies = [
- "bincode",
  "fastrand",
  "rayon",
  "serde",
