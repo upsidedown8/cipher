@@ -3,10 +3,7 @@ use clap::IntoApp;
 use clap_complete::Shell;
 use std::path::PathBuf;
 
-#[cfg(windows)]
 const BIN_NAME: &str = "crypto";
-#[cfg(not(windows))]
-const BIN_NAME: &str = "cipher";
 
 pub fn completions(output: Option<PathBuf>, shell: opt::Shell) {
     let mut app = opt::Opt::into_app();

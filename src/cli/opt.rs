@@ -1,11 +1,23 @@
-use std::path::PathBuf;
-
 use clap::{ArgEnum, Args, Parser, Subcommand};
+use std::path::PathBuf;
 
 /// Encrypt, decrypt and solve classical ciphers.
 #[derive(Parser, Debug)]
-#[clap(name = "cipher", author = "Tom Thorogood <tomthorogood@outlook.com>")]
+#[cfg_attr(windows, clap(name = "crypto"))]
+#[cfg_attr(not(windows), clap(name = "cipher"))]
+#[clap(author = "Tom Thorogood <tomthorogood@outlook.com>")]
 pub enum Opt {
+    /// Process a text corpus
+    Corpus {
+        /// Filename to read (or use stdin)
+        #[clap(long, short)]
+        file: Option<PathBuf>,
+        /// Output directory
+        #[clap(long, short)]
+        out: PathBuf,
+    },
+    /// Perform text segmentation
+    Segment,
     /// Generate completion scripts
     Completions {
         /// Output file to write completion to, if unspecified then writes to

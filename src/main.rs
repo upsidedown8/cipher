@@ -18,6 +18,8 @@ fn main() -> anyhow::Result<()> {
     let mut cfg = CipherConfig::load();
 
     match Opt::parse() {
+        Opt::Corpus { file, out } => corpus::corpus(file, out),
+        Opt::Segment => segment::segment(),
         Opt::Completions { output, shell } => {
             completions::completions(output, shell);
             Ok(())
