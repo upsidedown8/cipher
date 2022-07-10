@@ -9,7 +9,7 @@ use crate::error::CipherError;
 
 const QUALIFIER: &str = "";
 const ORGANISATION: &str = "";
-const APPLICATION: &str = "cipher";
+const APPLICATION: &str = "crypto";
 const CONFIG_FILENAME: &str = "config.toml";
 const LANG_DIR: &str = "lang";
 
