@@ -1,4 +1,7 @@
-use classic_crypto::lang::{AlphabetLen, StatsSize};
+use classic_crypto::{
+    analysis,
+    lang::{with_alphabet::StatsSize, AlphabetLen},
+};
 use colorful::{Colorful, HSL};
 
 use crate::{util, CipherConfig, StatsCmd};
@@ -12,14 +15,14 @@ pub fn stats(
     let lang = cfg.load_lang_or_selected(lang)?;
     let text = util::unwrap_or_stdin(text)?;
     let alph = lang.with_alphabet(AlphabetLen::Any);
-    let cp = alph.to_cp(&text).collect::<Vec<_>>();
+    let cp = alph.code_points(&text).collect::<Vec<_>>();
     let len = cp.len();
 
     match stats_opt {
-        StatsCmd::Periodic { width, alphabet } => {
+        StatsCmd::Periodic { width, alphabet: _ } => {
             let expected = alph.expected_ioc();
             let ioc: Vec<_> = (1..len.min(100))
-                .map(|p| alph.periodic_ioc(cp.iter().copied(), p))
+                .map(|p| analysis::periodic_ioc(cp.iter().map(|&x| x as usize), p))
                 .take_while(|&x| x.is_normal())
                 .collect();
             let max = ioc.iter().copied().fold(0.0, f32::max);
@@ -53,30 +56,30 @@ pub fn stats(
             }
         }
         StatsCmd::Freq {
-            alphabet,
-            punct,
-            whitespace,
+            alphabet: _,
+            punct: _,
+            whitespace: _,
         } => {
             todo!()
         }
-        StatsCmd::Length { alphabet } => todo!(),
-        StatsCmd::Ioc { alphabet } => {
-            println!("{}", alph.ioc(cp.iter().copied()));
+        StatsCmd::Length { alphabet: _ } => todo!(),
+        StatsCmd::Ioc { alphabet: _ } => {
+            println!("{}", analysis::ioc(cp.iter().map(|&x| x as usize)));
         }
         StatsCmd::ChiSquared => {
-            println!("{}", alph.chi_squared(cp.iter().copied()));
+            println!("{}", alph.chi_squared(cp));
         }
         StatsCmd::Unigram => {
-            println!("{}", alph.score(cp.iter().copied(), StatsSize::Unigrams));
+            println!("{}", alph.score(cp, StatsSize::Unigrams));
         }
         StatsCmd::Bigram => {
-            println!("{}", alph.score(cp.iter().copied(), StatsSize::Bigrams));
+            println!("{}", alph.score(cp, StatsSize::Bigrams));
         }
         StatsCmd::Trigram => {
-            println!("{}", alph.score(cp.iter().copied(), StatsSize::Trigrams));
+            println!("{}", alph.score(cp, StatsSize::Trigrams));
         }
         StatsCmd::Quadgram => {
-            println!("{}", alph.score(cp.iter().copied(), StatsSize::Quadgrams));
+            println!("{}", alph.score(cp, StatsSize::Quadgrams));
         }
     }
 

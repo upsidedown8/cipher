@@ -5,14 +5,13 @@ use crate::{
     },
     util, CipherConfig, Opt,
 };
-use classic_crypto::{cipher::*, lang::StatsSize};
+use classic_crypto::{cipher::*, prelude::StatsSize};
 
 pub fn solve(cfg: &CipherConfig, solve_opt: Opt) -> anyhow::Result<()> {
-    #[allow(unused)]
     if let Opt::Solve {
         cipher,
-        crib,
-        crib_pos,
+        crib: _,
+        crib_pos: _,
         show_key,
         no_plain,
         stats_size,

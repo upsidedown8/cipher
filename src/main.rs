@@ -1,8 +1,6 @@
 //! A command line program for encrypting, decrypting, analysing and
 //! breaking classical ciphers.
 
-#![warn(missing_docs)]
-
 use classic_crypto::lang::Lang;
 
 mod cli;

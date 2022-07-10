@@ -1,10 +1,10 @@
 //! Handles both encrypt and decrypt submodules
 
+use crate::{cli::opt::CipherCmd, util, CipherConfig, CryptCmd};
 use classic_crypto::cipher::{
     Affine, Atbash, Caesar, Cipher, ClassicVigenere, Railfence, Rot13, Scytale, Substitution,
 };
-
-use crate::{cli::opt::CipherCmd, util, CipherConfig, CryptCmd};
+use std::fmt::Display;
 
 pub trait CliCipher
 where
@@ -16,7 +16,7 @@ where
 
 impl<'l, C> CliCipher for C
 where
-    C: Cipher<'l>,
+    C: Cipher<'l> + Display,
 {
     fn encrypt(&self, msg: &str) -> String {
         self.encrypt(msg)

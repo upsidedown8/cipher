@@ -3,6 +3,11 @@ use clap::IntoApp;
 use clap_complete::Shell;
 use std::path::PathBuf;
 
+#[cfg(windows)]
+const BIN_NAME: &str = "crypto";
+#[cfg(not(windows))]
+const BIN_NAME: &str = "cipher";
+
 pub fn completions(output: Option<PathBuf>, shell: opt::Shell) {
     let mut app = opt::Opt::into_app();
 
@@ -11,17 +16,14 @@ pub fn completions(output: Option<PathBuf>, shell: opt::Shell) {
         opt::Shell::PowerShell => Shell::PowerShell,
     };
 
-    match output
-        .map(|path| {
-            std::fs::OpenOptions::new()
-                .create(true)
-                .write(true)
-                .open(path)
-                .ok()
-        })
-        .flatten()
-    {
-        Some(mut file) => clap_complete::generate(shell, &mut app, "cipher", &mut file),
-        None => clap_complete::generate(shell, &mut app, "cipher", &mut std::io::stdout()),
+    match output.and_then(|path| {
+        std::fs::OpenOptions::new()
+            .create(true)
+            .write(true)
+            .open(path)
+            .ok()
+    }) {
+        Some(mut file) => clap_complete::generate(shell, &mut app, BIN_NAME, &mut file),
+        None => clap_complete::generate(shell, &mut app, BIN_NAME, &mut std::io::stdout()),
     };
 }
