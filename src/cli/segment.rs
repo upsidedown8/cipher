@@ -70,6 +70,7 @@ fn max(a: (f32, usize), b: (f32, usize)) -> (f32, usize) {
     }
 }
 
+/// Algorithm inspired by: https://stackoverflow.com/questions/8870261/how-to-split-text-without-spaces-into-list-of-words/11642687#11642687
 pub fn segment_str(s: &str, words: &Words) -> String {
     let max_len = words.max_len();
     let text = s
