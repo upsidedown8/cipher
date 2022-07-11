@@ -5,7 +5,7 @@ use log::{debug, trace};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs, io::Read, path::PathBuf};
 
-use crate::error::CipherError;
+use crate::{cli::segment::Words, error::CipherError};
 
 const QUALIFIER: &str = "";
 const ORGANISATION: &str = "";
@@ -65,6 +65,17 @@ impl CipherConfig {
             None => self.load_selected(),
         }
     }
+    /// Loads the word list related to the lanmguage `name`, or if that
+    /// fails, the word list for the selected language.
+    pub fn load_words_or_selected(&self, name: Option<String>) -> Result<Words> {
+        match name {
+            Some(name) => match self.load_words(&name) {
+                Ok(lang) => Ok(lang),
+                Err(_) => self.load_selected_words(),
+            },
+            None => self.load_selected_words(),
+        }
+    }
     /// Metadata for the language
     pub fn lang_meta(&self, name: &str) -> Option<&LangMeta> {
         self.lang_map.get(name.trim())
@@ -77,8 +88,16 @@ impl CipherConfig {
                 .ok_or(CipherError::NoLangSelected)?,
         )
     }
+    /// Loads the wordlist for the preferred lang if it is set
+    pub fn load_selected_words(&self) -> Result<Words> {
+        self.load_words(
+            self.selected_lang
+                .as_ref()
+                .ok_or(CipherError::NoLangSelected)?,
+        )
+    }
     /// Adds a language file by name
-    pub fn add_lang(&mut self, name: String, lang: &Lang) -> Result<()> {
+    pub fn add_lang(&mut self, name: String, lang: &Lang, words: &Words) -> Result<()> {
         // check whether name already exists
         let name = name.trim();
         if self.lang_map.contains_key(name) {
@@ -99,6 +118,7 @@ impl CipherConfig {
         // create directory
         fs::create_dir_all(Self::lang_dir()?)?;
         fs::write(Self::lang_file_path(id)?, bincode::serialize(lang)?)?;
+        fs::write(Self::words_file_path(id)?, bincode::serialize(words)?)?;
 
         Ok(())
     }
@@ -117,28 +137,40 @@ impl CipherConfig {
 
         // delete file
         fs::remove_file(Self::lang_file_path(id)?)?;
+        fs::remove_file(Self::words_file_path(id)?)?;
 
         // remove from preferred
         if self.selected_lang.as_deref() == Some(name) {
             self.selected_lang = None;
         }
 
+        self.save()?;
+
         Ok(())
     }
     /// Attempts to load a language file, given its name
     pub fn load_lang(&self, name: &str) -> Result<Lang> {
-        // check whether name exists
-        let name = name.trim();
-        let id = self
-            .lang_map
-            .get(name)
-            .map(|m| m.id)
-            .ok_or(CipherError::LangNotFound)?;
-
+        let id = self.lookup(name)?;
         let bytes = fs::read(Self::lang_file_path(id)?)?;
         let lang = bincode::deserialize(&bytes)?;
-
         Ok(lang)
+    }
+    /// Attempts to load a words file, given the language name.
+    pub fn load_words(&self, name: &str) -> Result<Words> {
+        let id = self.lookup(name)?;
+        let bytes = fs::read(Self::words_file_path(id)?)?;
+        let words = bincode::deserialize(&bytes)?;
+        Ok(words)
+    }
+
+    /// Lookup the language name, get the id.
+    fn lookup(&self, name: &str) -> Result<usize> {
+        // check whether name exists
+        let name = name.trim();
+        self.lang_map
+            .get(name)
+            .map(|m| m.id)
+            .ok_or_else(|| CipherError::LangNotFound.into())
     }
 
     /// An iterator over language names
@@ -199,7 +231,10 @@ impl CipherConfig {
         Self::config_path().map(|p| p.join(LANG_DIR))
     }
     fn lang_file_path(id: usize) -> Result<PathBuf> {
-        Self::lang_dir().map(|cfg| cfg.join(format!("{}.bin", id)))
+        Self::lang_dir().map(|cfg| cfg.join(format!("{id}.lang")))
+    }
+    fn words_file_path(id: usize) -> Result<PathBuf> {
+        Self::lang_dir().map(|cfg| cfg.join(format!("{id}.words")))
     }
     fn config_path() -> Result<PathBuf> {
         ProjectDirs::from(QUALIFIER, ORGANISATION, APPLICATION)

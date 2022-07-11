@@ -19,7 +19,7 @@ fn main() -> anyhow::Result<()> {
 
     match Opt::parse() {
         Opt::Corpus { file, out } => corpus::corpus(file, out),
-        Opt::Segment => segment::segment(),
+        Opt::Segment { text, lang } => segment::segment(&cfg, text, lang),
         Opt::Completions { output, shell } => {
             completions::completions(output, shell);
             Ok(())

@@ -1,6 +1,8 @@
 use crate::{util, CipherConfig, Lang, LangCmd};
 use std::io::{stdin, stdout, Read, Write};
 
+use super::segment::Words;
+
 /// Handles the lang submodule
 pub fn lang(cfg: &mut CipherConfig, lang_opt: LangCmd) -> anyhow::Result<()> {
     match lang_opt {
@@ -22,8 +24,9 @@ pub fn lang(cfg: &mut CipherConfig, lang_opt: LangCmd) -> anyhow::Result<()> {
             };
 
             let lang = Lang::new(upper, lower, &corpus)?;
+            let words = Words::new(&corpus);
 
-            cfg.add_lang(name, &lang)?;
+            cfg.add_lang(name, &lang, &words)?;
         }
         LangCmd::List => {
             let selected = cfg.selected_lang();

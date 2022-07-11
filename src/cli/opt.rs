@@ -17,7 +17,14 @@ pub enum Opt {
         out: PathBuf,
     },
     /// Perform text segmentation
-    Segment,
+    Segment {
+        /// Text to segment (else stdin)
+        #[clap(long, short)]
+        text: Option<String>,
+        /// If present, overrides the selected lang and uses the value given
+        #[clap(global = true, short, long)]
+        lang: Option<String>,
+    },
     /// Generate completion scripts
     Completions {
         /// Output file to write completion to, if unspecified then writes to

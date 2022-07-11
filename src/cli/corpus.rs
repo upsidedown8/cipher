@@ -6,29 +6,19 @@ use std::{
     path::PathBuf,
 };
 
-pub fn corpus(file: Option<PathBuf>, out: PathBuf) -> anyhow::Result<()> {
-    let corpus = match file {
-        Some(path) => std::fs::read_to_string(path)?,
-        None => stdin_to_string()?,
-    };
-
-    // find all words
-    let r_find = regex::Regex::new(r"\b[a-zA-Z]+('[a-zA-Z'])?\b")?;
-    let words: Vec<_> = r_find
-        .find_iter(&corpus)
+// find all words
+pub fn words(s: &str) -> Vec<String> {
+    let r_find = regex::Regex::new(r"\b[a-zA-Z]+('[a-zA-Z'])?\b").unwrap();
+    r_find
+        .find_iter(s)
         .map(|m| m.as_str().to_lowercase())
-        .collect();
+        .collect()
+}
 
-    // write word file
-    let f_words_path = out.join("words.txt");
-    println!("writing {}", f_words_path.to_string_lossy());
-    let mut f_words = io::BufWriter::new(fs::File::create(f_words_path)?);
-    for w in &words {
-        write!(f_words, "{w} ")?;
-    }
-
+// find word frequencies
+pub fn frequencies(words: impl IntoIterator<Item = String>) -> HashMap<String, usize> {
     let mut freqs = HashMap::new();
-    for w in &words {
+    for w in words {
         match freqs.entry(w) {
             Entry::Occupied(mut e) => {
                 *e.get_mut() += 1;
@@ -39,7 +29,26 @@ pub fn corpus(file: Option<PathBuf>, out: PathBuf) -> anyhow::Result<()> {
         }
     }
 
-    let mut freqs = freqs.into_iter().collect::<Vec<_>>();
+    freqs
+}
+
+pub fn corpus(file: Option<PathBuf>, out: PathBuf) -> anyhow::Result<()> {
+    let corpus = match file {
+        Some(path) => std::fs::read_to_string(path)?,
+        None => stdin_to_string()?,
+    };
+
+    let words = words(&corpus);
+
+    // write word file
+    let f_words_path = out.join("words.txt");
+    println!("writing {}", f_words_path.to_string_lossy());
+    let mut f_words = io::BufWriter::new(fs::File::create(f_words_path)?);
+    for w in &words {
+        write!(f_words, "{w} ")?;
+    }
+
+    let mut freqs = frequencies(words).into_iter().collect::<Vec<_>>();
     freqs.sort_unstable_by_key(|&(_, f)| usize::MAX - f);
 
     // write frequency file
